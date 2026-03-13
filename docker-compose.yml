@@ -1,0 +1,97 @@
+# Kafka (KRaft) stack for local development
+# - Kafka broker runs in KRaft (no Zookeeper)
+# - Schema Registry for Avro schemas
+# - Kafka UI for browsing topics and messages
+version: '3.8'
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    environment:
+      # KRaft mode: broker + controller in one container (dev)
+      KAFKA_PROCESS_ROLES: broker,controller
+      # Controller quorum voters: <id>@<host>:<controller-port>
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      # Listeners: broker (PLAINTEXT) and controller (CONTROLLER)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # Node / broker identifiers
+      KAFKA_KRAFT_BROKER_ID: '1'
+      KAFKA_NODE_ID: '1'
+      # Development defaults: single partition & replication factor 1 (avoid INVALID_REPLICATION_FACTOR)
+      KAFKA_NUM_PARTITIONS: '1'
+      KAFKA_DEFAULT_REPLICATION_FACTOR: '1'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: '1'
+      # Valid base64 16-byte cluster id (required for KRaft). Keep or replace with your generated value.
+      KAFKA_CLUSTER_ID: "OjxnNqlQQUGW8DXnTlxgOA=="
+      CLUSTER_ID: "OjxnNqlQQUGW8DXnTlxgOA=="
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.4.0
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    ports:
+      - "8081:8081"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: "kafka:9092"
+    ports:
+      - "8085:8080"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - order-service
+    ports:
+      - "8080:8080"
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    depends_on:
+      - kafka
+    # internal service; accessed via api-gateway
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: inventory-service
+    depends_on:
+      - kafka
+    # internal service; no host port mapping
+
+  billing-service:
+    build: ./billing-service
+    container_name: billing-service
+    depends_on:
+      - kafka
+    # internal service; no host port mapping
+
+volumes:
+  kafka_data:
+    driver: local
+
+# Notes:
+# - This compose file is intended for local development only.
+# - For production use, secure listeners and proper network configuration are required.
+# - If you prefer a different UI (Kafdrop, Kowl), swap the `kafka-ui` service accordingly.
