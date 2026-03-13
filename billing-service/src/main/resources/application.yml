@@ -1,0 +1,11 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: billing-service
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: billing-service
+      auto-offset-reset: earliest

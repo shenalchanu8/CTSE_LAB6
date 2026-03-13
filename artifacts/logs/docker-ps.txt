@@ -1,0 +1,3 @@
+NAMES              STATUS          PORTS
+mystifying_raman   Up 18 minutes   8080/tcp
+dazzling_gagarin   Up 22 minutes   8081/tcp

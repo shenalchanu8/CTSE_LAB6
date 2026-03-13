@@ -1,0 +1,8 @@
+NAME                IMAGE                                       COMMAND                  SERVICE             CREATED             STATUS          PORTS
+api-gateway         microservices-kafka-lab-api-gateway         "java -jar /app/app.…"   api-gateway         14 seconds ago      Up 12 seconds   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+billing-service     microservices-kafka-lab-billing-service     "java -jar /app/app.…"   billing-service     14 seconds ago      Up 12 seconds   8083/tcp
+inventory-service   microservices-kafka-lab-inventory-service   "java -jar /app/app.…"   inventory-service   14 seconds ago      Up 12 seconds   8082/tcp
+kafka               confluentinc/cp-kafka:7.4.0                 "/etc/confluent/dock…"   kafka               15 seconds ago      Up 12 seconds   0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp
+kafka-ui            provectuslabs/kafka-ui:latest               "/bin/sh -c 'java --…"   kafka-ui            About an hour ago   Up 12 seconds   0.0.0.0:8085->8080/tcp, [::]:8085->8080/tcp
+order-service       microservices-kafka-lab-order-service       "java -jar /app/app.…"   order-service       14 seconds ago      Up 12 seconds   8081/tcp
+schema-registry     confluentinc/cp-schema-registry:7.4.0       "/etc/confluent/dock…"   schema-registry     About an hour ago   Up 12 seconds   0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
